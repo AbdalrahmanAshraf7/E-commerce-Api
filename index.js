@@ -19,6 +19,6 @@ app.use("/api",products)
 
 
 
-const Port = process.env.PORT
+const Port = process.env.PORT || 5000
 
 app.listen(Port , ()=>console.log(`server is listening on port : ${Port}`))
