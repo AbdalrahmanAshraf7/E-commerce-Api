@@ -52,6 +52,7 @@ router.get("/products",asyncHandler(
 
         if(product.length ===0 )return res.status(200).json({ counter :  product.length , message : "no products here " });
         res.status(200).json({ counter :  product.length ,totalNumberOfProducts : NumberOfProducts , pageNumber : page  , productPerPage : productPage , numberOfPages : Math.ceil( NumberOfProducts /productPage )  ,  data :  product     });
+        console.log(product)
     }
 ))
 
