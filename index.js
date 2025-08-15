@@ -17,6 +17,18 @@ app.use("/api/",userPath)
 app.use("/api/",auth)
 app.use("/api",products)
 
+app.use((req, res, next) => {
+  res.status(404).json({ message: "Route not found" });
+});
+
+// لو حصل Error في أي Route
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({
+    message: err.message || "Internal Server Error",
+  });
+});
+
 
 
 const Port = process.env.PORT || 5000
