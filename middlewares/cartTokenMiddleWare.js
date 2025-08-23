@@ -9,7 +9,8 @@ function tokenCartCheck(req, res, next) {
   if(!authHeader) return res.status(400).json({message : "token is required"})
 
     try{
-        req.token = jwt.decode(authHeader).id
+        req.userId = jwt.verify(authHeader,"secretKey").id
+
 
 
     }catch(err){

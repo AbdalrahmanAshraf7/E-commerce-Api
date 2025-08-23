@@ -9,6 +9,11 @@ const productSchema = new moongose.Schema({
         maxlength : 30 , 
         trim : true , 
     },
+    quantity:{
+        type : Number,
+        default : 1 ,
+        require : true, 
+    },
     productDescription :{
         type : String ,
         require : true , 
@@ -29,19 +34,45 @@ const productSchema = new moongose.Schema({
     price : {
         type : Number , 
         require : true , 
-        trime : true
+        trim : true
     },
     salePercentage : {
         type : Number , 
         require : false , 
-        trime : true , 
+        trim : true , 
         default : "" , 
     },currencyType:{
          type: String,
   enum: ['USD', 'EUR', 'EGP'], 
   required: true
         
-    }
+    },
+    category: { type: String
+        , enum: ["Electronics", "Clothing", "Food", "Books","Drink"]
+        , required: true 
+    },
+    rating:[
+        {
+       rate :  { type: Number, default: 0 ,  enum: [0,1,2,3,4,5] },
+       userId:  {  type : moongose.Schema.Types.ObjectId , ref: "User", required: true }
+        }
+
+    ],
+    totalRates:{
+         type: Number,
+          default: 0 ,
+    },
+    comments:[
+        {
+            userId : {  type : moongose.Schema.Types.ObjectId , ref: "User", required: true },
+            theComment :{type : String ,trim : true  },
+            createdAt: { type: Date, default: Date.now },
+            like : [{userId : {type : moongose.Schema.Types.ObjectId , ref: "User", }} ],
+            disLike :[ {userId : {type : moongose.Schema.Types.ObjectId , ref: "User", }} ], 
+        }
+    ]
+       
+        
 
 },{timestamps : true})
 function validateProduct(obj){
@@ -53,7 +84,10 @@ function validateProduct(obj){
         image :  joi.string().required().trim(),
         price :  joi.required(),
         salePercentage : joi.number().min(0).max(100),
-        currencyType: joi.string().valid('USD', 'EUR', 'EGP').required()
+        currencyType: joi.string().valid('USD', 'EUR', 'EGP').required(),
+        category: joi.string().valid("Electronics", "Clothing", "Food", "Books","Drink").required(),
+        rating: joi.string().valid(0,1,2,3,4,5),
+        quantity: joi.number().required().min(1)
 
     })
 

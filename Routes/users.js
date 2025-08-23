@@ -27,7 +27,7 @@ router.post("/users/cart/:id",tokenCartCheck,asyncHandler(
             let isTrueProduct = await Product.findById(req.params.id)
         if(!isTrueProduct) return res.status(400).json({message : " this product dosent exist"})
 
-        let user = await User.findById(req.token)
+        let user = await User.findById(req.userId)
         let isExist = user.cart.find((C)=> C.productId.toString() === req.params.id )
         
 
@@ -44,7 +44,7 @@ router.post("/users/cart/:id",tokenCartCheck,asyncHandler(
         await user.save()
         await user.populate("cart.productId")
         res.status(200).json({message : "success",
-            data : await Product.findById(req.params.id),
+            data : await Product.findById(req.params.id).select("-rating"),
             quantity : isExist ? isExist.quantity : 1
         })
     }
@@ -57,7 +57,7 @@ router.delete("/users/cart/:id",tokenCartCheck,asyncHandler(
     if(!isValid){
         return res.status(404).json({message : "this id format is not true "})
     }
-        let user = await User.findById(req.token)
+        let user = await User.findById(req.userId).select("-rating")
         let isExist = user.cart.find((C)=> C.productId.toString() === req.params.id)
 
                 let isTrueProduct = await Product.findById(req.params.id)
@@ -80,11 +80,17 @@ user.cart = user.cart.filter(item => item.productId !== null);
 
 router.get("/users/cart",tokenCartCheck,asyncHandler(
     async(req,res)=>{
-        let user = await User.findById(req.token)
-        await user.populate("cart.productId")
+        let user = await User.findById(req.userId).select("-rating")
+        await user.populate({
+  path: "cart.productId",
+  select: "-rating"
+})
         user.cart = user.cart.filter(item => item.productId !== null);
+
+       
+        
         res.status(200).json({message : " success" ,
-            data : user.cart.length === 0 ? "the cart is empty !" : user.cart ,
+            data : user.cart.length === 0 ? "the cart is empty !" : user.cart,
             counter : user.cart.length
         } )
     }
@@ -101,7 +107,7 @@ router.post("/users/wishlist/:id",tokenCartCheck,asyncHandler(
                 return res.status(404).json({message : "this id format is not true "})
             }
 
-        let user = await User.findById(req.token)
+        let user = await User.findById(req.userId)
         let isExist = user.wishList.find((C)=> C.productId.toString() === req.params.id )
         let isTrueProduct = await Product.findById(req.params.id)
         
@@ -117,7 +123,7 @@ router.post("/users/wishlist/:id",tokenCartCheck,asyncHandler(
 
 
             await user.save();
-            await user.populate("wishList.productId");
+            await user.populate({path : "wishList.productId",select : "-rating"});
 user.wishList = user.wishList.filter(item => item.productId !== null);
             res.status(200).json({message : "success" ,
                                   data : user.wishList
@@ -127,7 +133,7 @@ user.wishList = user.wishList.filter(item => item.productId !== null);
 
 router.get("/users/wishlist",tokenCartCheck,asyncHandler(
     async(req,res)=>{
-        let user = await User.findById(req.token).populate("wishList.productId");
+        let user = await User.findById(req.userId).populate({path : "wishList.productId" , select : "-rating"});
 
         if (user.wishList.length === 0 ) return res.status(200).json({message : "empty wish list" , data : null})
 
