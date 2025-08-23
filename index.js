@@ -4,12 +4,13 @@ const mongoose = require("mongoose")
 const userPath = require("./Routes/users")
 const auth = require("./Routes/auth")
 const products = require("./Routes/products")
+const cors = require("cors");
 const dotenv = require("dotenv")
 dotenv.config()
 
 
 mongoose.connect(process.env.MongoUrI).then(()=>console.log("Connected to mongooo")).catch((err)=>console.log("not working",err))
-
+app.use(cors({ origin: "*" }))
 
 app.use(express.json());
 
