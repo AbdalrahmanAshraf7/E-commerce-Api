@@ -5,11 +5,16 @@ const userPath = require("./Routes/users")
 const auth = require("./Routes/auth")
 const products = require("./Routes/products")
 const dotenv = require("dotenv")
+const cors = require("cors")   // 👈 استدعاء cors
 dotenv.config()
 
 
 mongoose.connect(process.env.MongoUrI).then(()=>console.log("Connected to mongooo")).catch((err)=>console.log("not working",err))
 
+app.use(cors({
+  // origin: "*"  ,
+    credentials: true
+}))
 
 app.use(express.json());
 
@@ -33,3 +38,6 @@ app.use((err, req, res, next) => {
 const Port = process.env.PORT || 5000
 
 app.listen(Port , ()=>console.log(`server is listening on port : ${Port}`))
+
+
+module.exports = app
