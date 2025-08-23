@@ -230,38 +230,6 @@ router.post("/products/disLike/:id/:ID",tokenCartCheck,asyncHandler(
     }
 ))
 
-// router.post("/products/like/:id/:ID",tokenCartCheck,asyncHandler(
-//     async(req,res)=>{
-//         let isValid = mongoose.Types.ObjectId.isValid(req.params.id)
-//         if(!isValid) return res.status(404).json({message : "this id format is not true "})
-//         let isTrueProduct = await Product.findById(req.params.id)
-//         if(!isTrueProduct) return res.status(400).json({message : " this product dosent exist"})
-
-//             let product = await Product.findById(req.params.id)
-//             let isExistComment = product.comments.find((C)=>C.userId.toString() === req.params.ID)  
-    
-
-//         if(!isExistComment) return res.json("this comment donot exist")
-//         let isExistLike  =   isExistComment.like.find((L)=> L.userId.toString() === req.userId )
-
-
-
-//             if(isExistLike){
-//                 isExistComment.like = isExistComment.like.filter((L)=> L.userId.toString() !== req.userId)
-//             }else{
-
-//                 isExistComment.like.push(
-//                   { userId : new mongoose.Types.ObjectId(req.userId)}
-//                 )
-//             }
-
-//        await product.save()
-//        await product.populate({ path: "comments.like.userId", select: "userName" });
-//        res.json(product);
-
-//     }
-// ))
-
 
 router.delete("/products/:id",tokenCheck,allowOnlySpecificUser,asyncHandler(
   async(req,res)=>{
