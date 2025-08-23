@@ -12,7 +12,7 @@ dotenv.config()
 mongoose.connect(process.env.MongoUrI).then(()=>console.log("Connected to mongooo")).catch((err)=>console.log("not working",err))
 
 app.use(cors({
-  // origin: "*"  ,
+  origin: "http://localhost:5173"  ,
     credentials: true
 }))
 
