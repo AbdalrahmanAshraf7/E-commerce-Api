@@ -10,7 +10,11 @@ dotenv.config()
 
 
 mongoose.connect(process.env.MongoUrI).then(()=>console.log("Connected to mongooo")).catch((err)=>console.log("not working",err))
-app.use(cors({ origin: "*" }))
+app.use(cors({
+  origin: "*", 
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"]
+}));
 
 app.use(express.json());
 
@@ -35,3 +39,5 @@ app.use((err, req, res, next) => {
 const Port = process.env.PORT || 5000
 
 app.listen(Port , ()=>console.log(`server is listening on port : ${Port}`))
+
+app.options("*", cors());
