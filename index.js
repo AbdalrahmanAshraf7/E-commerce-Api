@@ -15,9 +15,9 @@ app.use(cors({
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"]
 }));
+app.options("*", cors());
 
 app.use(express.json());
-
 app.use("/api/",userPath)
 app.use("/api/",auth)
 app.use("/api",products)
@@ -26,7 +26,6 @@ app.use((req, res, next) => {
   res.status(404).json({ message: "Route not found" });
 });
 
-// لو حصل Error في أي Route
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({
@@ -38,6 +37,6 @@ app.use((err, req, res, next) => {
 
 const Port = process.env.PORT || 5000
 
-app.listen(Port , ()=>console.log(`server is listening on port : ${Port}`))
+// app.listen(Port , ()=>console.log(`server is listening on port : ${Port}`))
 
-app.options("*", cors());
+module.exports = app;
