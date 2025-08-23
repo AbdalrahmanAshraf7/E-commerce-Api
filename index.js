@@ -1,21 +1,20 @@
 const express = require("express");
 const app = express();
 const mongoose = require("mongoose");
-const userPath = require("./Routes/users");
-const auth = require("./Routes/auth");
-const products = require("./Routes/products");
 const dotenv = require("dotenv");
 dotenv.config();
 
-mongoose
-  .connect(process.env.MongoUrI)
-  .then(() => console.log("Connected to mongooo"))
-  .catch((err) => console.log("not working", err));
+const userPath = require("./Routes/users");
+const auth = require("./Routes/auth");
+const products = require("./Routes/products");
 
-// ✅ السماح بأكتر من Origin (localhost + Vercel)
+mongoose.connect(process.env.MongoUrI)
+  .then(() => console.log("Connected to mongooo"))
+  .catch(err => console.log("not working", err));
+
 const allowedOrigins = [
   "http://localhost:5173",
-  "https://your-frontend.vercel.app" // غيرها بدومين الفرونت إند بعد النشر
+  "https://your-frontend.vercel.app"
 ];
 
 app.use((req, res, next) => {
@@ -36,19 +35,19 @@ app.use((req, res, next) => {
 
 app.use(express.json());
 
+// Routes
 app.use("/api", userPath);
 app.use("/api", auth);
 app.use("/api", products);
 
-app.use((req, res, next) => {
+// Errors
+app.use((req, res) => {
   res.status(404).json({ message: "Route not found" });
 });
 
 app.use((err, req, res, next) => {
   console.error(err.stack);
-  res.status(500).json({
-    message: err.message || "Internal Server Error",
-  });
+  res.status(500).json({ message: err.message || "Internal Server Error" });
 });
 
 const Port = process.env.PORT || 5000;
