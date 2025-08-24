@@ -56,12 +56,14 @@ router.get("/products",asyncHandler(
 
         if (productName)filter.productName = { $regex: productName, $options: "i" };
         if (category) filter.category = category;
+
+        let numberOfProducts = await Product.countDocuments(filter)
         
         let product = await Product.find(filter).select("-rating").skip((page-1)*productPage).limit(productPage).populate({ path: "comments.userId", select: "userName" });
         let NumberOfProducts = await Product.countDocuments(); 
         if(product.length === 0 ) return res.status(200).json({ counter :  product.length , message : "no products here " });
         
-        res.status(200).json({ counter :  product.length ,totalNumberOfProducts : NumberOfProducts , pageNumber : page  , productPerPage : productPage , numberOfPages : Math.ceil( NumberOfProducts /productPage )  ,  data :  product});
+        res.status(200).json({ counter :  product.length ,totalNumberOfProducts : NumberOfProducts , pageNumber : page  , productPerPage : productPage , numberOfPages : Math.ceil( numberOfProducts /productPage )  ,  data :  product});
     }
     
 ))
