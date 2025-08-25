@@ -47,7 +47,7 @@ function registerValidation(obj){
     const Schema = joi.object({
         userName : joi.string().trim().required().min(6).max(15),
         userEmail : joi.string().trim().required().email(),
-        password : joi.string().trim().required().min(6)
+        password : joi.string().trim().required().min(6).max(13)
     })
 
     const {error} = Schema.validate(obj)
