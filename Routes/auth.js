@@ -74,30 +74,30 @@ router.post("/admin/register",asyncHandler(
 
 
 
-router.post("/signin",asyncHandler(
+router.post("/user/signin",asyncHandler(
   async(req,res)=>{
 
     let {error} = signUpValidation(req.body)
     if(error){
-        return res.json({message : error.details[0].message})
+        return res.status(400).json({message : error.details[0].message})
     }
     let user = await User.findOne({userEmail : req.body.userEmail})
 
     if(!user){
-      return res.status(200).json("Invalid Email Or Password")
+      return res.status(200).json({message:"Invalid Email Or Password"})
     }
 
     let isPassword = await bycript.compare(req.body.password ,  user.password)
 
     if(!isPassword){
-      return res.status(200).json("Invalid Email Or Password")
+      return res.status(200).json({message:"Invalid Email Or Password"})
     }
 
     
     
     let token = jwt.sign({id : user._id , userName : user.userName , email : user.userEmail , isAdmian : user.isAdmian},"secretKey",{ expiresIn: "7d" }) 
     let {password , ...other} = user._doc
-    res.status(200).json({ ...other,token})
+    res.status(200).json({ ...other,token , message : "success"})
   }
 ))
 
