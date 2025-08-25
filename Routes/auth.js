@@ -34,7 +34,7 @@ router.post("/user/register",asyncHandler(
         let results = await user.save()
 
         let {password , ...other} = results._doc
-        res.status(200).json({...other , token})
+        res.status(200).json({...other , token  , message : "Success"})
     }
 ))
 
