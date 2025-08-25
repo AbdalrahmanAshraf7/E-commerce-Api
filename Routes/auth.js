@@ -17,7 +17,7 @@ router.post("/user/register",asyncHandler(
       let user = await User.findOne({userEmail : req.body.userEmail})
 
       if(user){
-       return  res.status(400).json({message : " this email is  already used"})
+       return  res.status(200).json({message : " this email is  already used"})
       }
 
       const salt = await bycript.genSalt(10)
