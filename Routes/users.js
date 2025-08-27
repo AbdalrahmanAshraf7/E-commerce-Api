@@ -90,7 +90,7 @@ router.get("/users/cart",tokenCartCheck,asyncHandler(
        
         
         res.status(200).json({message : " success" ,
-            data : user.cart.length === 0 ? "the cart is empty !" : user.cart,
+            data : user.cart.length === 0 ? [] : user.cart,
             counter : user.cart.length
         } )
     }
