@@ -7,6 +7,8 @@ const {Product , validateProduct,validateProductUpate} = require("../modules/Pro
 const asyncHandler = require("express-async-handler")
 const { default: mongoose } = require("mongoose")
 const jwt = require("jsonwebtoken")
+const {User} = require("../modules/User")
+const {sendNoti} = require("./notifications")
 
 
 
@@ -54,6 +56,7 @@ router.get("/products",asyncHandler(
 
         let filter = {};
 
+        if(productName === "")
         if (productName)filter.productName = { $regex: productName, $options: "i" };
         if (category) filter.category = category;
 
@@ -76,7 +79,7 @@ router.get("/products/:id",asyncHandler(
         return res.status(404).json({message : "this id format is not true "})
     }
 
-        let product = await Product.findById(req.params.id).select("-rating")  ;
+        let product = await Product.findById(req.params.id).populate({ path: "comments.userId", select: "userName" }) ;
          if(product){
 
             let {comments , ...other} = product._doc
@@ -98,6 +101,8 @@ router.get("/products/:id",asyncHandler(
     
 ))
 
+// if (isExist.theComment === "" ) return 
+
 router.post("/products/comments/:id",tokenCartCheck,asyncHandler(
     async(req,res)=>{
         let isValid = mongoose.Types.ObjectId.isValid(req.params.id)
@@ -107,6 +112,8 @@ router.post("/products/comments/:id",tokenCartCheck,asyncHandler(
 
         let product = await Product.findById(req.params.id)
         let isExist = product.comments.find((C)=>C.userId.toString() === req.userId)     
+      
+        
         if(isExist){
             product.comments = product.comments.filter((C)=> C.userId.toString() !== req.userId)
 
@@ -115,8 +122,6 @@ router.post("/products/comments/:id",tokenCartCheck,asyncHandler(
             theComment : req.body.theComment
         })
 
-       
-        
         }else{
             product.comments.push({
             userId : new mongoose.Types.ObjectId(req.userId),
@@ -124,10 +129,10 @@ router.post("/products/comments/:id",tokenCartCheck,asyncHandler(
         })
         }
 
-       await product.save()
-       await product.populate({ path: "comments.userId", select: "userName" });
-       res.json(product);
-
+        product.comments = product.comments?.filter((C)=>C.theComment !== "")
+        await product.save()
+        await product.populate({ path: "comments.userId", select: "userName" });
+        res.json(product);
     }
 ))
 
@@ -168,12 +173,18 @@ router.post("/products/like/:id/:ID",tokenCartCheck,asyncHandler(
         let isTrueProduct = await Product.findById(req.params.id)
         if(!isTrueProduct) return res.status(400).json({message : " this product dosent exist"})
 
+            let user = await User.findById(req.params.ID)
+            let likedUser = await User.findById(req.userId)
             let product = await Product.findById(req.params.id)
             let isExistComment = product.comments.find((C)=>C.userId.toString() === req.params.ID)  
-    
-
+            
+            
         if(!isExistComment) return res.json("this comment donot exist")
         let isExistLike  =   isExistComment.like.find((L)=> L.userId.toString() === req.userId )
+
+        console.log(likedUser._id)
+
+
 
 
 
@@ -186,11 +197,27 @@ router.post("/products/like/:id/:ID",tokenCartCheck,asyncHandler(
                 )
 
                 isExistComment.disLike = isExistComment.disLike.filter((L)=> L.userId.toString() !== req.userId)
+                sendNoti(user.notificationsPermisson , `"${likedUser.userName}" liked to  your comment : "${isExistComment.theComment}"`)
+                user.notifications.push({
+                    message :`"${likedUser.userName}" liked to  your comment : "${isExistComment.theComment}"` ,
+                    productId : req.params.id ,
+                    commentId : isExistComment._id,
+                    LikedId : likedUser._id,
+                    isReaded : false
+                })
             }
             
             product.comments.like = {data : isExistComment.like , counterLikes : isExistComment.like.length}
-        
 
+
+               
+            
+            
+
+
+
+            
+       await user.save()
        await product.save()
        await product.populate({ path: "comments.like.userId", select: "userName" });
        res.json(product.comments.like);
@@ -204,9 +231,11 @@ router.post("/products/disLike/:id/:ID",tokenCartCheck,asyncHandler(
         if(!isValid) return res.status(404).json({message : "this id format is not true "})
         let isTrueProduct = await Product.findById(req.params.id)
         if(!isTrueProduct) return res.status(400).json({message : " this product dosent exist"})
-
+            let user = await User.findById(req.params.ID)
             let product = await Product.findById(req.params.id)
             let isExistComment = product.comments.find((C)=>C.userId.toString() === req.params.ID)  
+            let likedUser = await User.findById(req.userId)
+
     
 
         if(!isExistComment) return res.json("this comment donot exist")
@@ -223,14 +252,25 @@ router.post("/products/disLike/:id/:ID",tokenCartCheck,asyncHandler(
                 )
 
                 isExistComment.like = isExistComment.like.filter((L)=> L.userId.toString() !== req.userId)
-            }
 
+                sendNoti(user.notificationsPermisson , `"${likedUser.userName}" disLiked to  your comment : "${isExistComment.theComment}"`)
+
+                user.notifications.push({
+                    message :`"${likedUser.userName}" disLiked to  your comment : "${isExistComment.theComment}"` ,
+                    productId : req.params.id ,
+                    commentId : isExistComment._id,
+                    LikedId : likedUser._id,
+                    isReaded : false
+                })
+            }
+       await user.save()
        await product.save()
        await product.populate({ path: "comments.like.userId", select: "userName" });
        res.json(product);
 
     }
 ))
+
 
 
 router.delete("/products/:id",tokenCheck,allowOnlySpecificUser,asyncHandler(
@@ -307,12 +347,12 @@ router.put("/products/:id",asyncHandler(
         }
     }
 ))
-
+// let isValid = mongoose.Types.ObjectId.isValid(req.params.id)
+        // if(!isValid) return res.status(404).json({message : "this id format is not true "})
 
 router.post("/products/:id",tokenCartCheck,asyncHandler(
     async(req,res)=>{
-        let isValid = mongoose.Types.ObjectId.isValid(req.params.id)
-        if(!isValid) return res.status(404).json({message : "this id format is not true "})
+        
         let isTrueProduct = await Product.findById(req.params.id)
         if(!isTrueProduct) return res.status(400).json({message : " this product dosent exist"})
 
@@ -324,6 +364,7 @@ router.post("/products/:id",tokenCartCheck,asyncHandler(
 
         if( rateValue === 0 ){
            rate.rating  =  rate.rating.filter((R)=> R.userId.toString() !==  req.userId.toString() ) ; 
+            
         
             
         }
@@ -335,8 +376,9 @@ router.post("/products/:id",tokenCartCheck,asyncHandler(
             userId : req.userId})
         }
 
-     rate.totalRates =rateValue === 0 ? rate.totalRates = 0 : rate.rating.map((R)=> R.rate).reduce((a,b)=>a+b , 0)/rate.rating.length
-       
+     rate.totalRates = rate.rating.filter((R)=>Number(R.rate) !== 0 ).map((R)=> R.rate).reduce((a,b)=>a+b , 0)/(rate.rating.filter((R) => Number(R.rate) !== 0).length || 1);
+     rate.rating =   rate.rating.filter((R)=>Number(R.rate) !== 0 )
+
       await  rate.save()
  
         

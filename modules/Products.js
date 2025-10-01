@@ -69,6 +69,7 @@ const productSchema = new moongose.Schema({
             createdAt: { type: Date, default: Date.now },
             like : [{userId : {type : moongose.Schema.Types.ObjectId , ref: "User", }} ],
             disLike :[ {userId : {type : moongose.Schema.Types.ObjectId , ref: "User", }} ], 
+           
         }
     ]
        

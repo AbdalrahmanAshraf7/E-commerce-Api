@@ -4,7 +4,9 @@ const mongoose = require("mongoose")
 const userPath = require("./Routes/users")
 const cors = require('cors');
 const auth = require("./Routes/auth")
+const {routers ,sendNoti } = require("./Routes/notifications")
 const products = require("./Routes/products")
+const notificationsPermisson = require("./Routes/notificationsPermisson")
 const dotenv = require("dotenv")
 const { required } = require("joi")
 dotenv.config()
@@ -19,6 +21,8 @@ app.use(express.json());
 app.use("/api/",userPath)
 app.use("/api/",auth)
 app.use("/api",products)
+app.use("/api",routers )
+app.use("/api",notificationsPermisson)
 
 app.use((req, res, next) => {
   res.status(404).json({ message: "Route not found" });

@@ -30,13 +30,33 @@ const UserSchema = new mongoose.Schema({
     cart:[
         {
         productId :  {type : mongoose.Schema.Types.ObjectId , ref : "Product" , required : true},
-        quantity :   {type: Number, default: 1 }
-        }
+        quantity :   {type: Number, default: 1 },
+        totalPrice :{type: Number, require : true}
+        },
+     
     ],
     wishList:[
         {
         productId :  {type : mongoose.Schema.Types.ObjectId , ref : "Product" , required : true},
         }
+    ],
+    notificationsPermisson : {
+        type : String ,
+        trim : true , 
+        
+    },
+    notifications:[
+        {
+            message : {type : String ,  },
+            productId :  {type : mongoose.Schema.Types.ObjectId , ref : "Product" , required : true},
+            commentId :  {type : mongoose.Schema.Types.ObjectId , ref : "Product" , required : true},
+            LikedId :  {type : mongoose.Schema.Types.ObjectId , ref : "User" , required : true},
+            isReaded : {type :Boolean , default : false},
+             createdAt: { type: Date, default: Date.now },
+            updatedAt: { type: Date, default: Date.now },
+
+        }
+
     ]
         
     
