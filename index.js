@@ -2,6 +2,8 @@ const express = require("express")
 const app = express()
 const mongoose = require("mongoose")
 const userPath = require("./Routes/users")
+const payMent = require("./Routes/server")
+const Stripe = require("./Routes/Stripe")
 const cors = require('cors');
 const auth = require("./Routes/auth")
 const {routers ,sendNoti } = require("./Routes/notifications")
@@ -23,6 +25,8 @@ app.use("/api/",auth)
 app.use("/api",products)
 app.use("/api",routers )
 app.use("/api",notificationsPermisson)
+app.use("/api",payMent)
+app.use("/api",Stripe)
 
 app.use((req, res, next) => {
   res.status(404).json({ message: "Route not found" });
